@@ -526,18 +526,32 @@ function unknownAnswerCount() {
 
 function renderHome() {
   return `
-    <section class="card hero">
-      <div class="eyebrow">Cancer Risk Demo</div>
-      <h1>测一测你属于哪种「癌症风险体质」</h1>
-      <p class="body" style="margin-top:12px">先做一个轻量测试，获得标签画像；再补充关键信息，解锁更完整的风险提示与筛查建议。</p>
-    </section>
-    <section class="card">
-      <p class="muted" style="text-align:center">你是为谁做评估？</p>
-      <div class="options">
-        <button class="choice" data-action="audience" data-value="self"><strong>我自己</strong><br><span class="muted">了解自己的风险情况，看看该先查哪里</span></button>
-        <button class="choice" data-action="audience" data-value="parent"><strong>给爸妈</strong><br><span class="muted">帮父母做一次评估，尽量少折腾、少跑医院</span></button>
+    <section class="home-hero">
+      <div class="hero-topline">
+        <span>多癌种风险初筛 Demo</span>
+        <span>约 2 分钟</span>
       </div>
-      <p class="footer">用于科普传播与风险提示，不替代医生诊断</p>
+      <h1>先看清：你或爸妈更该优先查哪个方向</h1>
+      <p class="home-lead">不是诊断，也不是吓唬人。用一组轻量问题，把生活习惯、家族因素、身体信号和筛查空白，转成更清楚的下一步建议。</p>
+      <div class="promise-grid">
+        <div><strong>16 类方向</strong><br><span>肺、肠、胃、肝等</span></div>
+        <div><strong>高/中/低提示</strong><br><span>先知道该关注哪里</span></div>
+        <div><strong>路径建议</strong><br><span>传统筛查 or 整体评估</span></div>
+      </div>
+    </section>
+    <section class="card home-start">
+      <p class="section-title">先选一个场景</p>
+      <div class="home-options">
+        <button class="home-option" data-action="audience" data-value="self">
+          <span class="option-icon">我</span>
+          <span><strong>我自己测</strong><br><em>看看当前更值得优先关注的癌种方向，以及下一步怎么查。</em></span>
+        </button>
+        <button class="home-option featured" data-action="audience" data-value="parent">
+          <span class="option-icon">爸妈</span>
+          <span><strong>帮爸妈测</strong><br><em>信息不确定也可以填，先判断怎样少折腾地把风险看清楚。</em></span>
+        </button>
+      </div>
+      <div class="home-note">不需要身份证或手机号 · 当前 DEMO 不会真实提交信息 · 不替代医学建议</div>
     </section>
   `;
 }

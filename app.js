@@ -606,7 +606,7 @@ function renderStage2() {
           const active = q.type === 'multi' ? (Array.isArray(selected) && selected.includes(opt.value)) : selected === opt.value;
           return `<button class="choice ${q.type === 'multi' ? 'blue' : ''} ${active ? 'active' : ''}" data-action="${q.type === 'multi' ? 'multi-answer' : 'stage2-answer'}" data-value="${opt.value}">${getOptionLabel(q.id, opt.label)}</button>`;
         }).join('')}
-        ${q.type === 'multi' ? '<button class="btn" data-action="multi-skip">都没有 / 跳过</button>' : ''}
+        ${q.type === 'multi' ? `<button class="skip-choice ${Array.isArray(selected) && selected.length === 0 ? 'active' : ''}" data-action="multi-skip">都没有 / 跳过</button>` : ''}
       </div>
       ${q.type === 'multi'
         ? `<div class="actions">

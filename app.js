@@ -200,13 +200,68 @@ function getStage1Summary(tag) {
   }[tag] || '你的结果有点意思，也值得认真看一眼。';
 }
 
+function getParentStage1Insight(dims) {
+  const sorted = Object.entries(dims).sort((a, b) => b[1] - a[1]);
+  const [topKey, topScore] = sorted[0] || [];
+  const high = topScore >= 3;
+  const map = {
+    D1: {
+      title: high ? '作息和压力上有些需要留意' : '作息和压力情况需要再确认',
+      summary: '你提到的作息、压力或疲惫状态，可能会影响爸妈对身体信号的感知，也容易让一些问题被拖延处理。',
+    },
+    D2: {
+      title: high ? '生活习惯里有些风险点' : '饮食运动情况需要再确认',
+      summary: '你提到的饮食和运动情况里，可能有一些会慢慢增加健康风险的因素，适合继续补充关键信息。',
+    },
+    D3: {
+      title: high ? '烟酒相关风险点比较明显' : '烟酒情况需要再确认',
+      summary: '你提到的烟酒相关情况，会让部分癌种方向更值得被优先看清楚，后续需要结合年龄和既往检查一起判断。',
+    },
+    D4: {
+      title: dims.D4 <= 1 ? '健康管理意识相对较好' : '系统筛查缺口需要关注',
+      summary: dims.D4 <= 1
+        ? '从你目前填写的信息看，爸妈并不是完全缺少健康管理意识，下一步更适合把筛查方向具体化。'
+        : '你提到爸妈在体检或早筛上可能有一段空窗期，这类信息空白本身就会增加后续决策难度。',
+    },
+    D5: {
+      title: high ? '身体已经有些信号需要确认' : '身体状态仍需要补充判断',
+      summary: '你观察到的身体状态信息，暂时还不足以判断风险高低，但已经值得继续做完整评估。',
+    },
+    D6: {
+      title: high ? '家族因素值得认真看一眼' : '家族相关信息需要再确认',
+      summary: '家族因素不代表爸妈一定有问题，但它确实会让筛查决策更适合提前、系统地推进。',
+    },
+  };
+
+  return map[topKey] || {
+    title: '需要进一步补充关键信息',
+    summary: '目前只能看到一些初步线索，还不能判断爸妈真正更需要关注哪些方向。',
+  };
+}
+
+function getStage1Feedback(dims) {
+  const tags = getTags(dims);
+  if (!isParent()) {
+    if (state.stage1Index < 2) return '先快速测几题，看看你的风险画像正在往哪一类靠近。';
+    if (state.stage1Index < 5) return `你目前更接近「${tags.main}」`;
+    return `你当前属于「${tags.main}」倾向，继续完成可解锁完整报告。`;
+  }
+
+  if (state.stage1Index < 2) return '先收集几个基础信息，看看爸妈有哪些方向值得继续确认。';
+  if (state.stage1Index < 5) return '正在补充生活习惯和烟酒相关信息，初步线索会逐渐变清楚。';
+  if (state.stage1Index < 8) return '现在已经能看到一些习惯和健康管理线索，还需要继续确认身体状态。';
+  return '快完成阶段一了，接下来会把这些观察转成更具体的筛查判断。';
+}
+
 function stage2Questions() {
   const dims = sumStage1();
   return [...stage2BaseQuestions, ...stage2BranchQuestions.filter((q) => q.showIf(dims))];
 }
 
 function num(id, fallback = 0) {
-  return Number(state.stage2Answers[id] ?? fallback);
+  const value = state.stage2Answers[id] ?? fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function arr(id) {
@@ -231,19 +286,23 @@ function computeCancerRisk() {
   const breastIssue = num('s2_breast_issue');
   const femaleScreening = num('s2_female_screening');
 
-  let lung = 0.5 * dims.D3 + 0.2 * dims.D1 + 0.1 * dims.D5 + 0.2 * dims.D6 + age + familyCount + screening + smokingYears * 0.8 + symptom * 0.2 + (gender === 'male' ? 0.5 : 0);
+  const maleFactor = gender === 'male' ? 1 : 0;
+  const femaleFactor = gender === 'female' ? 1 : 0;
+  const unknownGenderFactor = gender !== 'male' && gender !== 'female' ? 0.5 : 0;
+
+  let lung = 0.5 * dims.D3 + 0.2 * dims.D1 + 0.1 * dims.D5 + 0.2 * dims.D6 + age + familyCount + screening + smokingYears * 0.8 + symptom * 0.2 + maleFactor * 0.5;
   let colorectal = 0.4 * dims.D2 + 0.2 * dims.D1 + 0.2 * dims.D5 + 0.2 * dims.D6 + age + familyCount + screening + symptom * 0.4 + bmi * 0.5;
   let gastric = 0.4 * dims.D2 + 0.3 * dims.D5 + 0.3 * dims.D6 + age + familyCount + screening + symptom * 0.6;
-  let liver = 0.5 * dims.D3 + 0.2 * dims.D2 + 0.3 * dims.D5 + age + screening + symptom * 0.5 + bmi * 0.4 + (gender === 'male' ? 0.5 : 0);
-  let breast = 0.3 * dims.D2 + 0.2 * dims.D5 + 0.2 * dims.D6 + age + bmi * 0.6 + (gender === 'female' ? 1 : -1) + breastIssue * 1.4;
+  let liver = 0.5 * dims.D3 + 0.2 * dims.D2 + 0.3 * dims.D5 + age + screening + symptom * 0.5 + bmi * 0.4 + maleFactor * 0.5;
+  let breast = 0.3 * dims.D2 + 0.2 * dims.D5 + 0.2 * dims.D6 + age + bmi * 0.6 + femaleFactor * 1 - maleFactor * 1 + breastIssue * 1.4;
   let pancreas = 0.4 * dims.D3 + 0.2 * dims.D5 + 0.2 * dims.D2 + age + symptom * 0.6;
   let esophagus = 0.5 * dims.D3 + 0.3 * dims.D2 + age + symptom * 0.4 + refluxSwallow * 1.4;
   let nasopharynx = 0.3 * dims.D6 + 0.2 * dims.D3 + age + symptom * 0.3;
   let bladder = 0.6 * dims.D3 + age + symptom * 0.3 + urinaryIssue * 1.5;
-  let prostate = age * 1.2 + (gender === 'male' ? 1 : -2) + 0.3 * dims.D6 + urinaryIssue * 0.7;
-  let ovary = age + (gender === 'female' ? 1 : -2) + 0.4 * dims.D6 + Math.max(femaleScreening, 0) * 0.5;
-  let cervix = age + (gender === 'female' ? 1 : -2) + screening + 0.3 * dims.D5 + Math.max(femaleScreening, 0) * 1.2;
-  let endometrium = age + bmi * 0.7 + (gender === 'female' ? 1 : -2) + Math.max(femaleScreening, 0) * 0.8;
+  let prostate = age * 1.2 + maleFactor * 1 - femaleFactor * 2 + unknownGenderFactor * 0.2 + 0.3 * dims.D6 + urinaryIssue * 0.7;
+  let ovary = age + femaleFactor * 1 - maleFactor * 2 + unknownGenderFactor * 0.2 + 0.4 * dims.D6 + Math.max(femaleScreening, 0) * 0.5;
+  let cervix = age + femaleFactor * 1 - maleFactor * 2 + unknownGenderFactor * 0.2 + screening + 0.3 * dims.D5 + Math.max(femaleScreening, 0) * 1.2;
+  let endometrium = age + bmi * 0.7 + femaleFactor * 1 - maleFactor * 2 + unknownGenderFactor * 0.2 + Math.max(femaleScreening, 0) * 0.8;
   let kidney = age + bmi * 0.5 + 0.2 * dims.D3 + urinaryIssue * 0.8;
   let gallbladder = age + 0.3 * dims.D2 + 0.3 * dims.D5;
   let lymphoma = age + 0.3 * dims.D5 + 0.2 * dims.D6;
@@ -426,6 +485,45 @@ function getOptionLabel(questionId, label) {
   return optionMap[questionId]?.[label] || label;
 }
 
+function getQuestionOptions(question) {
+  if (!isParent() || question.id.startsWith('q')) return question.options;
+
+  const unknownSingleIds = new Set([
+    's2_family_count',
+    's2_screening',
+    's2_symptom_duration',
+    's2_bmi',
+    's2_reflux_swallow',
+    's2_urinary_issue',
+    's2_breast_issue',
+    's2_female_screening',
+    's2_smoking_years',
+    's2_family_early',
+  ]);
+  const unknownMultiIds = new Set([
+    's2_family_type',
+    's2_medical_history',
+    's2_diet_detail',
+  ]);
+
+  if (unknownSingleIds.has(question.id)) {
+    return [...question.options, { label: '不清楚', value: 'unknown' }];
+  }
+  if (unknownMultiIds.has(question.id)) {
+    return [...question.options, { label: '不清楚', value: 'unknown' }];
+  }
+  return question.options;
+}
+
+function unknownAnswerCount() {
+  if (!isParent()) return 0;
+  return Object.values(state.stage2Answers).reduce((count, value) => {
+    if (value === 'unknown') return count + 1;
+    if (Array.isArray(value) && value.includes('unknown')) return count + 1;
+    return count;
+  }, 0);
+}
+
 function renderHome() {
   return `
     <section class="card hero">
@@ -447,8 +545,7 @@ function renderHome() {
 function renderStage1() {
   const q = stage1Questions[state.stage1Index];
   const dims = sumStage1();
-  const tags = getTags(dims);
-  const feedback = state.stage1Index < 2 ? '先快速测几题，看看你的风险画像正在往哪一类靠近。' : `你目前更接近「${tags.main}」`;
+  const feedback = getStage1Feedback(dims);
   return `
     <section class="card">
       ${progress(state.stage1Index + 1, stage1Questions.length)}
@@ -465,15 +562,17 @@ function renderStage1() {
 }
 
 function renderStage1Result() {
-  const tags = getTags(sumStage1());
+  const dims = sumStage1();
+  const tags = getTags(dims);
+  const parentInsight = getParentStage1Insight(dims);
   return `
     <section class="card">
-      <p class="muted">你的阶段一标签</p>
-      <h1>${tags.main}</h1>
-      <div class="notice" style="margin-top:18px">“${getStage1Summary(tags.main)}”</div>
-      <div class="notice amber" style="margin-top:14px">当前只是一个轻量标签结果。这个标签更偏“行为画像”，并不能真正反映你的癌症风险情况。</div>
-      <div class="notice" style="margin-top:14px">完成完整评估，你会得到：哪些癌种方向更值得优先关注、风险高/中/低分布，以及应该先查哪个。</div>
-      <button class="btn primary" style="width:100%;margin-top:18px" data-action="go-stage2">继续完成完整评估（建议）</button>
+      <p class="muted">${isParent() ? '爸妈的阶段一初步观察' : '你的阶段一标签'}</p>
+      <h1>${isParent() ? parentInsight.title : tags.main}</h1>
+      <div class="notice" style="margin-top:18px">${isParent() ? parentInsight.summary : `“${getStage1Summary(tags.main)}”`}</div>
+      <div class="notice amber" style="margin-top:14px">${isParent() ? '当前只是一组基于你观察到的信息形成的初步线索，还不能代表爸妈真实的癌症风险水平。' : '当前只是一个轻量标签结果。这个标签更偏“行为画像”，并不能真正反映你的癌症风险情况。'}</div>
+      <div class="notice" style="margin-top:14px">${isParent() ? '继续完成完整评估后，可以更清楚地看到：爸妈哪些癌种方向更值得优先关注、哪些信息还不确定，以及更适合传统逐项筛查还是先做整体评估。' : '完成完整评估，你会得到：哪些癌种方向更值得优先关注、风险高/中/低分布，以及应该先查哪个。'}</div>
+      <button class="btn primary" style="width:100%;margin-top:18px" data-action="go-stage2">${isParent() ? '继续帮爸妈完成完整评估（建议）' : '继续完成完整评估（建议）'}</button>
     </section>
   `;
 }
@@ -481,6 +580,7 @@ function renderStage1Result() {
 function renderStage2() {
   const questions = stage2Questions();
   const q = questions[state.stage2Index];
+  const options = getQuestionOptions(q);
   const selected = state.stage2Answers[q.id];
   return `
     <section class="card">
@@ -488,7 +588,7 @@ function renderStage2() {
       <div class="notice blue" style="margin-top:16px">第二阶段用于提升风险判断的准确性。你也可以中途退出，但结果参考性会更有限。</div>
       <h2 style="margin-top:18px">${getQuestionTitle(q)}</h2>
       <div class="options">
-        ${q.options.map((opt) => {
+        ${options.map((opt) => {
           const active = q.type === 'multi' ? (Array.isArray(selected) && selected.includes(opt.value)) : selected === opt.value;
           return `<button class="choice ${q.type === 'multi' ? 'blue' : ''} ${active ? 'active' : ''}" data-action="${q.type === 'multi' ? 'multi-answer' : 'stage2-answer'}" data-value="${opt.value}">${getOptionLabel(q.id, opt.label)}</button>`;
         }).join('')}
@@ -515,7 +615,9 @@ function renderFinal() {
   const recs = traditionalList(5);
   const mcedComp = mcedComparisonSummary();
   const urgency = urgencyNudgeSummary(risks);
-  const decisionUncertain = highCount >= 2 || mediumCount >= 3;
+  const unknownCount = unknownAnswerCount();
+  const ageFactor = num('s2_age');
+  const decisionUncertain = highCount >= 2 || mediumCount >= 3 || (isParent() && unknownCount >= 2 && ageFactor >= 2);
   const otherNames = risks.slice(1, 3).map(([organ]) => organLabels[organ]).join('、');
   return `
     <section class="card">
@@ -537,7 +639,7 @@ function renderFinal() {
     <section class="card">
       <p class="muted">${isParent() ? '你现在在帮爸妈做决策' : '你的当前状态'}</p>
       <h2>${decisionUncertain ? (isParent() ? '更适合优先考虑少折腾、少跑医院的方式' : '更适合先做整体评估') : '筛查方向相对明确'}</h2>
-      <p class="body" style="margin-top:12px">除了${organLabels[top[0]]}，${otherNames || '其他方向'}也有一定风险。很多人真正卡住的不是知不知道要筛查，而是不确定该先查哪个。</p>
+      <p class="body" style="margin-top:12px">除了${organLabels[top[0]]}，${otherNames || '其他方向'}也有一定风险。很多人真正卡住的不是知不知道要筛查，而是不确定该先查哪个。${unknownCount ? `你还有 ${unknownCount} 个关键信息暂时不清楚，这种“不确定”本身也会增加决策难度。` : ''}</p>
       <div class="notice amber" style="margin-top:14px">${decisionUncertain ? '在这种状态下，多癌种早筛（整体评估）通常是更容易迈出第一步的方式。' : '如果方向已经比较明确，也可以优先按传统筛查路径做最关键的一项。'}</div>
       <div class="notice blue" style="margin-top:14px">
         <strong>如果选择多癌筛查（DNA甲基化），这笔账大概是：</strong><br>
@@ -644,6 +746,7 @@ function mcedComparisonSummary() {
 function urgencyNudgeSummary(risks) {
   const dims = sumStage1();
   const topRisks = risks.slice(0, 3).map(([organ]) => organLabels[organ]).join('、');
+  const unknownCount = unknownAnswerCount();
   const items = [];
 
   if (num('s2_symptom_duration') >= 2) {
@@ -680,6 +783,11 @@ function urgencyNudgeSummary(risks) {
     items.push(isParent()
       ? '从体检和早筛态度看，这件事很容易继续被推后。真正麻烦的往往不是检查，而是一直没有开始。'
       : '从体检和早筛态度看，这件事很容易继续被推后。真正麻烦的往往不是检查，而是一直没有开始。');
+  }
+  if (unknownCount >= 2) {
+    items.push(isParent()
+      ? `你在帮爸妈填写时有 ${unknownCount} 个关键信息暂时不清楚。信息不完整不代表风险更高，但会让“先查哪个、怎么查”更难判断。`
+      : `你有 ${unknownCount} 个关键信息暂时不清楚。信息不完整不代表风险更高，但会让“先查哪个、怎么查”更难判断。`);
   }
 
   const fallback = isParent()
@@ -788,11 +896,12 @@ function renderLanding() {
         }).join('')}
         ${s2.map((q) => {
           const val = state.stage2Answers[q.id];
+          const options = getQuestionOptions(q);
           if (val === undefined) return '';
           const text = q.type === 'single'
-            ? getOptionLabel(q.id, q.options.find((o) => o.value === val)?.label || '')
+            ? getOptionLabel(q.id, options.find((o) => o.value === val)?.label || '')
             : (val || []).map((v) => {
-              const label = q.options.find((o) => o.value === v)?.label;
+              const label = options.find((o) => o.value === v)?.label;
               return label ? getOptionLabel(q.id, label) : '';
             }).filter(Boolean).join(' / ');
           return `<div class="mini"><span class="muted">${getQuestionTitle(q)}</span><br><strong>${text || '未选择'}</strong></div>`;
@@ -836,8 +945,9 @@ function resetAll() {
 function toggleMulti(qid, value) {
   const current = Array.isArray(state.stage2Answers[qid]) ? state.stage2Answers[qid] : [];
   let next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
-  if (value === 'none' && !current.includes(value)) next = ['none'];
-  if (value !== 'none' && next.includes('none')) next = next.filter((v) => v !== 'none');
+  const exclusiveValues = ['none', 'unknown'];
+  if (exclusiveValues.includes(value) && !current.includes(value)) next = [value];
+  if (!exclusiveValues.includes(value)) next = next.filter((v) => !exclusiveValues.includes(v));
   state.stage2Answers[qid] = next;
 }
 
@@ -867,13 +977,20 @@ app.addEventListener('click', (event) => {
     state.stage1Answers[stage1Questions[state.stage1Index].id] = Number(value);
     goNextStage1();
   }
-  if (action === 'stage1-prev') state.stage1Index = Math.max(0, state.stage1Index - 1);
+  if (action === 'stage1-prev') {
+    if (state.stage1Index === 0) {
+      state.screen = 'home';
+      state.audienceChoice = null;
+    } else {
+      state.stage1Index -= 1;
+    }
+  }
   if (action === 'stage1-next') {
     goNextStage1();
   }
   if (action === 'go-stage2') state.screen = 'stage2';
   if (action === 'stage2-answer') {
-    const found = currentStage2.options.find((opt) => String(opt.value) === value);
+    const found = getQuestionOptions(currentStage2).find((opt) => String(opt.value) === value);
     state.stage2Answers[currentStage2.id] = found?.value ?? value;
     goNextStage2();
   }

@@ -940,6 +940,14 @@ function render() {
   app.innerHTML = `<div class="shell"><div class="stack">${screens[state.screen]()}</div><p class="footer">当前版本为 DEMO，用于验证流程、文案和模块层级，不替代医学建议。</p></div>`;
 }
 
+function setScreen(screen) {
+  if (state.screen === screen) return;
+  state.screen = screen;
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  });
+}
+
 function resetAll() {
   Object.assign(state, {
     screen: 'home',
@@ -966,13 +974,13 @@ function toggleMulti(qid, value) {
 }
 
 function goNextStage1() {
-  if (state.stage1Index === stage1Questions.length - 1) state.screen = 'stage1Result';
+  if (state.stage1Index === stage1Questions.length - 1) setScreen('stage1Result');
   else state.stage1Index += 1;
 }
 
 function goNextStage2() {
   const questions = stage2Questions();
-  if (state.stage2Index === questions.length - 1) state.screen = 'final';
+  if (state.stage2Index === questions.length - 1) setScreen('final');
   else state.stage2Index += 1;
 }
 
@@ -985,7 +993,7 @@ app.addEventListener('click', (event) => {
 
   if (action === 'audience') {
     state.audienceChoice = value;
-    state.screen = 'stage1';
+    setScreen('stage1');
   }
   if (action === 'stage1-answer') {
     state.stage1Answers[stage1Questions[state.stage1Index].id] = Number(value);
@@ -993,7 +1001,7 @@ app.addEventListener('click', (event) => {
   }
   if (action === 'stage1-prev') {
     if (state.stage1Index === 0) {
-      state.screen = 'home';
+      setScreen('home');
       state.audienceChoice = null;
     } else {
       state.stage1Index -= 1;
@@ -1002,7 +1010,7 @@ app.addEventListener('click', (event) => {
   if (action === 'stage1-next') {
     goNextStage1();
   }
-  if (action === 'go-stage2') state.screen = 'stage2';
+  if (action === 'go-stage2') setScreen('stage2');
   if (action === 'stage2-answer') {
     const found = getQuestionOptions(currentStage2).find((opt) => String(opt.value) === value);
     state.stage2Answers[currentStage2.id] = found?.value ?? value;
@@ -1017,12 +1025,12 @@ app.addEventListener('click', (event) => {
   if (action === 'toggle-risks') state.showAllRisks = !state.showAllRisks;
   if (action === 'choose-plan') {
     state.planChoice = value;
-    state.screen = 'plan';
+    setScreen('plan');
   }
-  if (action === 'go-consult') state.screen = 'consult';
-  if (action === 'go-final') state.screen = 'final';
-  if (action === 'go-plan') state.screen = 'plan';
-  if (action === 'go-landing') state.screen = 'landing';
+  if (action === 'go-consult') setScreen('consult');
+  if (action === 'go-final') setScreen('final');
+  if (action === 'go-plan') setScreen('plan');
+  if (action === 'go-landing') setScreen('landing');
   if (action === 'intent') {
     state.consultIntent = value;
     state.consultSubmitted = true;

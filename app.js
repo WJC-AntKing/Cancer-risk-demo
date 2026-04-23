@@ -532,7 +532,12 @@ function renderHome() {
         <span>约 2 分钟</span>
       </div>
       <h1>先看清：你或爸妈更该优先查哪个方向</h1>
+      <div class="friend-note">
+        <div>朋友，你有多久没认真看过自己的癌症风险了？确认暂时没什么明显风险，心里也会更踏实一点。</div>
+        <div>如果是帮爸妈看，也不用一上来就安排一堆检查。先把风险方向和不确定信息理清楚，反而更少折腾。</div>
+      </div>
       <p class="home-lead">不是诊断，也不是吓唬人。用一组轻量问题，把生活习惯、家族因素、身体信号和筛查空白，转成更清楚的下一步建议。</p>
+      <p class="home-sublead">泛泛体检不一定越多越好。更合理的是：没必要时不硬筛，有必要时先看清该重点查什么。</p>
       <div class="promise-grid">
         <div><strong>16 类方向</strong><br><span>肺、肠、胃、肝等</span></div>
         <div><strong>高/中/低提示</strong><br><span>先知道该关注哪里</span></div>

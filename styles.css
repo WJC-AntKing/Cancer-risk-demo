@@ -100,6 +100,35 @@ button {
   line-height: 1.8;
 }
 
+.friend-note {
+  position: relative;
+  z-index: 1;
+  margin-top: 16px;
+  border-left: 3px solid #67e8f9;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 11px 13px;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.friend-note div + div {
+  margin-top: 8px;
+  color: #dbeafe;
+  font-weight: 600;
+}
+
+.home-sublead {
+  position: relative;
+  z-index: 1;
+  margin-top: 10px;
+  max-width: 380px;
+  color: #bae6fd;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
 .promise-grid {
   position: relative;
   z-index: 1;

@@ -388,6 +388,34 @@ function traditionalList(limit = 5) {
   });
 }
 
+function mcedEvidenceSummary(highCount, mediumCount) {
+  const elevatedCount = highCount + mediumCount;
+  const directionText = elevatedCount >= 3 ? `${elevatedCount} 个方向` : elevatedCount === 2 ? '2 个方向' : '1 个方向';
+  const parentPrefix = isParent() ? '爸妈' : '你';
+
+  if (elevatedCount <= 1) {
+    return {
+      title: '先把最明确的方向查清楚',
+      body: `${parentPrefix}目前主要是 1 个方向风险更突出。传统针对性筛查更像第一步：先解决最明确的问题，再根据结果决定是否需要扩大范围。`,
+      items: [
+        '传统筛查适合处理已经比较明确的单一方向。',
+        '多癌种整体评估可以作为补充，但不是必须一上来就做。',
+      ],
+    };
+  }
+
+  return {
+    title: `${directionText}同时升高时，看的不只是这几个器官`,
+    body: `${parentPrefix}现在不是“刚好有几个项目要查”，而是出现了多个风险线索叠加。年龄、家族史、烟酒、体重、慢性炎症等因素，往往会同时影响多个癌种。既然已经决定认真筛一次，更合理的目标不是只查掉眼前这几个方向，而是尽可能把可覆盖范围内的风险先排一遍。`,
+    items: [
+      '传统筛查能优先确认最明确的方向，但胰腺、食管、鼻咽、膀胱、卵巢、子宫体、肾、胆囊、淋巴系统等，并没有像肠镜、低剂量 CT、乳腺/宫颈筛查那样成熟且容易执行的常规路径。',
+      '多癌种整体评估的价值，是把这些传统筛查不容易覆盖的方向一起纳入视野，减少“这次只查了两个方向，其他十几个还漏没漏”的不确定感。',
+      '从体验上看，它更像一次更全、更便捷的差异化筛查：线下 1 次采血，先形成整体风险线索，再决定后续是否需要针对性检查。',
+      '它不能替代医生诊断，也不能替代肠镜、低剂量 CT、乳腺/宫颈等已有推荐筛查；更适合作为传统筛查之外的补充工具。',
+    ],
+  };
+}
+
 function progress(current, total) {
   const pct = Math.round((current / total) * 100);
   return `<div><div class="progress-top"><span>进度</span><span>${pct}%</span></div><div class="bar"><span style="width:${pct}%"></span></div></div>`;
@@ -641,6 +669,7 @@ function renderFinal() {
   const unknownCount = unknownAnswerCount();
   const ageFactor = num('s2_age');
   const decisionUncertain = highCount >= 2 || mediumCount >= 3 || (isParent() && unknownCount >= 2 && ageFactor >= 2);
+  const evidence = mcedEvidenceSummary(highCount, mediumCount);
   const otherNames = risks.slice(1, 3).map(([organ]) => organLabels[organ]).join('、');
   if (!hasElevatedRisk) return renderLowRiskFinal(risks, visible);
 
@@ -666,6 +695,13 @@ function renderFinal() {
       <h2>${decisionUncertain ? (isParent() ? '更适合优先考虑少折腾、少跑医院的方式' : '更适合先做整体评估') : '筛查方向相对明确'}</h2>
       <p class="body" style="margin-top:12px">除了${organLabels[top[0]]}，${otherNames || '其他方向'}也有一定风险。很多人真正卡住的不是知不知道要筛查，而是不确定该先查哪个。${unknownCount ? `你还有 ${unknownCount} 个关键信息暂时不清楚，这种“不确定”本身也会增加决策难度。` : ''}</p>
       <div class="notice amber" style="margin-top:14px">${decisionUncertain ? '在这种状态下，多癌种早筛（整体评估）通常是更容易迈出第一步的方式。' : '如果方向已经比较明确，也可以优先按传统筛查路径做最关键的一项。'}</div>
+      <div class="evidence-box" style="margin-top:14px">
+        <h3>${evidence.title}</h3>
+        <p>${evidence.body}</p>
+        <div class="evidence-list">
+          ${evidence.items.map((item) => `<div>${item}</div>`).join('')}
+        </div>
+      </div>
       <div class="notice blue" style="margin-top:14px">
         <strong>如果选择多癌筛查（DNA甲基化），这笔账大概是：</strong><br>
         相比按传统路径分别安排 ${mcedComp.labels.join(' / ')} 等方向筛查，整体评估通常只需线下 1 次采血。<br>

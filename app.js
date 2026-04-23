@@ -625,6 +625,7 @@ function renderFinal() {
   const visible = state.showAllRisks ? risks : risks.slice(0, 3);
   const highCount = risks.filter(([, score]) => level(score) === '高').length;
   const mediumCount = risks.filter(([, score]) => level(score) === '中').length;
+  const hasElevatedRisk = highCount > 0 || mediumCount > 0;
   const top = risks[0];
   const recs = traditionalList(5);
   const mcedComp = mcedComparisonSummary();
@@ -633,6 +634,8 @@ function renderFinal() {
   const ageFactor = num('s2_age');
   const decisionUncertain = highCount >= 2 || mediumCount >= 3 || (isParent() && unknownCount >= 2 && ageFactor >= 2);
   const otherNames = risks.slice(1, 3).map(([organ]) => organLabels[organ]).join('、');
+  if (!hasElevatedRisk) return renderLowRiskFinal(risks, visible);
+
   return `
     <section class="card">
       <p class="muted">${isParent() ? '你帮爸妈测出来的完整结果' : '你的完整结果'}</p>
@@ -695,6 +698,40 @@ function renderFinal() {
       <h2>先做：${recs[0]?.title || '基础筛查'}</h2>
       <p class="body" style="margin-top:10px">先把最明确的方向确认，再决定下一步。</p>
       <button class="btn" style="width:100%;margin-top:14px" data-action="go-consult">帮我细化筛查顺序</button>
+    </section>
+
+    <div class="actions">
+      <button class="btn" data-action="reset">重新测试</button>
+      <button class="btn primary" data-action="go-landing">查看映射</button>
+    </div>
+  `;
+}
+
+function renderLowRiskFinal(risks, visible) {
+  return `
+    <section class="card">
+      <p class="muted">${isParent() ? '你帮爸妈测出来的完整结果' : '你的完整结果'}</p>
+      <h2>当前没有明显中高风险方向</h2>
+      <p class="body" style="margin-top:12px">${isParent() ? '从目前填写的信息看，爸妈暂时没有明显需要被优先推进的癌症筛查方向。' : '从目前填写的信息看，你暂时没有明显需要被优先推进的癌症筛查方向。'}</p>
+      <div class="stack" style="margin-top:16px">
+        ${visible.map(([organ, score]) => `<div class="risk-card">
+          <div class="risk-head"><span>${organLabels[organ]}风险</span><span class="pill">低 · ${score.toFixed(1)}</span></div>
+          <p class="body" style="margin-top:8px">${riskText(organ, score)}</p>
+        </div>`).join('')}
+      </div>
+      ${risks.length > 3 ? `<button class="btn" style="width:100%;margin-top:14px" data-action="toggle-risks">${state.showAllRisks ? '收起其余风险方向' : '展开查看全部 16 个方向'}</button>` : ''}
+    </section>
+
+    <section class="card calm">
+      <p class="muted">${isParent() ? '这次更适合的建议' : '这次更适合你的建议'}</p>
+      <h2>${isParent() ? '暂时不用急着安排癌症筛查' : '暂时不用急着做癌症筛查'}</h2>
+      <p class="body" style="margin-top:12px">${isParent() ? '如果爸妈没有持续不适、明显家族高危因素或医生特别建议，现在更重要的是把日常状态维持好，而不是为了筛查而筛查。' : '如果你没有持续不适、明显家族高危因素或医生特别建议，现在更重要的是把日常状态维持好，而不是为了筛查而筛查。'}</p>
+      <div class="stack" style="margin-top:14px">
+        <div class="mini good">保持规律作息，别长期透支身体。</div>
+        <div class="mini good">吃得均衡一点，动得稳定一点，别让压力一直憋着。</div>
+        <div class="mini good">${isParent() ? '多给爸妈一点陪伴和关注，比立刻安排一堆检查更重要。' : '保持好心情，也继续保留对自己的爱和照顾。'}</div>
+      </div>
+      <div class="notice" style="margin-top:14px">${isParent() ? '如果之后出现持续不适、体重明显变化、异常出血、长期咳嗽等情况，再及时就医确认。' : '如果之后出现持续不适、体重明显变化、异常出血、长期咳嗽等情况，再及时就医确认。'}</div>
     </section>
 
     <div class="actions">

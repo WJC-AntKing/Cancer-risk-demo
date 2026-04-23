@@ -434,8 +434,18 @@ h3 {
   color: #9a3412;
 }
 
+.mini.good {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
 .urgency {
   border-color: #fdba74;
+}
+
+.calm {
+  border-color: #86efac;
 }
 
 .input {

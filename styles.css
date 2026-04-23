@@ -85,9 +85,9 @@ button {
   position: relative;
   z-index: 1;
   margin-top: 20px;
-  max-width: 360px;
+  max-width: 410px;
   color: #fff;
-  font-size: 34px;
+  font-size: 31px;
 }
 
 .home-lead {
@@ -157,6 +157,19 @@ button {
   color: #cbd5e1;
   font-size: 11px;
   line-height: 1.45;
+}
+
+.cancer-scope {
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px 12px;
+  color: #dbeafe;
+  font-size: 12px;
+  line-height: 1.7;
 }
 
 .home-start {
@@ -237,6 +250,23 @@ button {
   font-size: 12px;
   line-height: 1.6;
   text-align: center;
+}
+
+.home-explain {
+  margin-top: 16px;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 14px;
+}
+
+.home-explain p {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.home-explain p + p {
+  margin-top: 8px;
 }
 
 .eyebrow {

@@ -531,18 +531,17 @@ function renderHome() {
         <span>多癌种风险初筛 Demo</span>
         <span>约 2 分钟</span>
       </div>
-      <h1>先看清：你或爸妈更该优先查哪个方向</h1>
+      <h1>先看清：你或爸妈有必要做癌症筛查吗？有的话优先查哪个方向？</h1>
       <div class="friend-note">
         <div>朋友，你有多久没认真看过自己的癌症风险了？确认暂时没什么明显风险，心里也会更踏实一点。</div>
         <div>如果是帮爸妈看，也不用一上来就安排一堆检查。先把风险方向和不确定信息理清楚，反而更少折腾。</div>
       </div>
-      <p class="home-lead">不是诊断，也不是吓唬人。用一组轻量问题，把生活习惯、家族因素、身体信号和筛查空白，转成更清楚的下一步建议。</p>
-      <p class="home-sublead">泛泛体检不一定越多越好。更合理的是：没必要时不硬筛，有必要时先看清该重点查什么。</p>
       <div class="promise-grid">
-        <div><strong>16 类方向</strong><br><span>肺、肠、胃、肝等</span></div>
+        <div><strong>16 类常见方向</strong><br><span>覆盖多种高发癌种线索</span></div>
         <div><strong>高/中/低提示</strong><br><span>先知道该关注哪里</span></div>
         <div><strong>路径建议</strong><br><span>传统筛查 or 整体评估</span></div>
       </div>
+      <div class="cancer-scope">肺、结直肠、胃、肝、乳腺、胰腺、食管、鼻咽、膀胱、前列腺、卵巢、宫颈、子宫体、肾、胆囊、淋巴系统</div>
     </section>
     <section class="card home-start">
       <p class="section-title">先选一个场景</p>
@@ -555,6 +554,10 @@ function renderHome() {
           <span class="option-icon">爸妈</span>
           <span><strong>帮爸妈测</strong><br><em>信息不确定也可以填，先判断怎样少折腾地把风险看清楚。</em></span>
         </button>
+      </div>
+      <div class="home-explain">
+        <p>不是诊断，也不是吓唬人。用一组轻量问题，把生活习惯、家族因素、身体信号和筛查空白，转成更清楚的下一步建议。</p>
+        <p>泛泛体检不一定越多越好。更合理的是：没必要时不硬筛，有必要时先看清该重点查什么。</p>
       </div>
       <div class="home-note">不需要身份证或手机号 · 当前 DEMO 不会真实提交信息 · 不替代医学建议</div>
     </section>

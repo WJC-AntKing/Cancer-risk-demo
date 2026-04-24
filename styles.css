@@ -480,8 +480,49 @@ h3 {
   background: #fff;
   padding: 9px 10px;
   color: #475569;
+}
+
+.evidence-list strong {
+  display: block;
+  color: #1e293b;
+  font-size: 13px;
+}
+
+.evidence-list span {
+  display: block;
+  margin-top: 4px;
+  color: #475569;
   font-size: 12px;
   line-height: 1.65;
+}
+
+.savings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.saving-pill {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.saving-pill strong {
+  display: block;
+  color: #1d4ed8;
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+.saving-pill span {
+  display: block;
+  margin-top: 4px;
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .risk-card {
@@ -584,6 +625,7 @@ h3 {
     font-size: 27px;
   }
 
+  .savings-grid,
   .split,
   .actions {
     grid-template-columns: 1fr;
